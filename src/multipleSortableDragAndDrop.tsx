@@ -8,7 +8,7 @@ import {
 	useSensors,
 	type DragEndEvent,
 	type DragStartEvent,
-	type DragMoveEvent,
+	type DragOverEvent,
 } from "@dnd-kit/core";
 import {
 	SortableContext,
@@ -41,42 +41,19 @@ const defaultBoxItemMap: Record<string, Array<ItemType>> = {
 	],
 };
 
-export function SortableDragAndDropMultiple() {
+export function MultipleSortableDragAndDrop() {
 	const [boxItemMap, setBoxItemMap] =
 		useState<Record<string, Array<ItemType>>>(defaultBoxItemMap);
 	const [activeId, setActiveId] = useState<string | null>(null);
 
 	function handleDragStart(event: DragStartEvent) {
 		const { active } = event;
-
-		// NOTE: not need to show overlay when same parent container (this does not work, since DragStartEvent does not have over)
-		// const activeId = active.id.toString();
-		// const overId = over?.id.toString();
-
-		// const keys = Object.keys(boxItemMap);
-		// const sourceParentKey = keys.find(key => boxItemMap[key].find(item => item.id === activeId));
-		// const targetParentKey = keys.find(key => boxItemMap[key].find(item => item.id === overId)) ?? overId;
-
-		// // alert(`sourceParentKey: ${sourceParentKey}, targetParentKey: ${targetParentKey}`);
-		// if (sourceParentKey === targetParentKey) {
-		//   return;
-		// }
 		setActiveId(active.id.toString());
 	}
 
-	function handleDragMove(event: DragMoveEvent) {
+	function handleDragOver(event: DragOverEvent) {
 		const { active, over } = event;
-		console.log("handleDragMove", active.id, over?.id);
-
-		// if (over) {
-		//   const overElement = document.getElementById(over?.id.toString());
-		//   if (overElement && !over.id.toString().includes(BOX_ID_PREFIX)) {
-		//     overElement.className = overElement.className.includes(BG_YELLOW_400) ?
-		//       overElement.className.replace(BG_YELLOW_400, "") : `${overElement.className} ${BG_YELLOW_400}`;
-
-		//     console.log(overElement.className);
-		//   }
-		// }
+		console.log("handleDragOver", active.id, over?.id);
 	}
 
 	function handleDragEnd(event: DragEndEvent) {
@@ -92,6 +69,11 @@ export function SortableDragAndDropMultiple() {
 
 		setActiveId(null);
 
+		// TODO:
+		// same parent
+		// not need DragOverlay
+
+		// different parent
 		setBoxItemMap((preBoxItemMap) => {
 			const activeId = active.id.toString();
 			const overId = over.id.toString();
@@ -104,6 +86,14 @@ export function SortableDragAndDropMultiple() {
 				keys.find((key) =>
 					preBoxItemMap[key].find((item) => item.id === overId)
 				) ?? overId;
+
+			console.log(
+				"handleDragEnd",
+				active.id,
+				over.id,
+				sourceParentKey,
+				targetParentKey
+			);
 
 			if (!sourceParentKey || !targetParentKey) {
 				console.error(
@@ -186,7 +176,8 @@ export function SortableDragAndDropMultiple() {
 				sensors={sensors}
 				collisionDetection={closestCenter}
 				onDragStart={handleDragStart}
-				onDragMove={handleDragMove}
+				// onDragMove={handleDragMove}
+				onDragOver={handleDragOver}
 				onDragEnd={handleDragEnd}
 			>
 				<div className="flex space-x-8">
