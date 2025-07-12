@@ -69,11 +69,6 @@ export function MultipleSortableDragAndDrop() {
 
 		setActiveId(null);
 
-		// TODO:
-		// same parent
-		// not need DragOverlay
-
-		// different parent
 		setBoxItemMap((preBoxItemMap) => {
 			const activeId = active.id.toString();
 			const overId = over.id.toString();
