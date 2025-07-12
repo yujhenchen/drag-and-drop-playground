@@ -26,7 +26,6 @@ type ItemType = {
 };
 
 const BOX_ID_PREFIX = "box-";
-const BG_YELLOW_400 = "bg-yellow-400";
 
 const defaultBoxItemMap: Record<string, Array<ItemType>> = {
 	[`${BOX_ID_PREFIX}1`]: [
@@ -51,9 +50,47 @@ export function MultipleSortableDragAndDrop() {
 		setActiveId(active.id.toString());
 	}
 
-	function handleDragOver(event: DragOverEvent) {
+	function handleDragOver(event: DragOverEvent): void {
 		const { active, over } = event;
-		console.log("handleDragOver", active.id, over?.id);
+
+		if (!over?.id || active.id === over.id) {
+			return;
+		}
+
+		// console.log(active.id, over.id);
+		const keys = Object.keys(boxItemMap);
+
+		const sourceParent = keys.find((key) =>
+			boxItemMap[key].find((item) => item.id === active.id)
+		);
+
+		if (!sourceParent) {
+			return;
+		}
+
+		// === target is droppable container ===
+		if (over.id.toString().includes(BOX_ID_PREFIX)) {
+			if (sourceParent !== over.id.toString()) {
+				setActiveId(active.id.toString());
+			} else {
+				setActiveId(null);
+			}
+			return;
+		}
+
+		// === target is item ===
+		const targetParent = keys.find((key) =>
+			boxItemMap[key].find((item) => item.id === over.id)
+		);
+		if (!targetParent) {
+			return;
+		}
+
+		if (sourceParent !== targetParent) {
+			setActiveId(active.id.toString());
+		} else {
+			setActiveId(null);
+		}
 	}
 
 	function handleDragEnd(event: DragEndEvent) {
@@ -81,14 +118,6 @@ export function MultipleSortableDragAndDrop() {
 				keys.find((key) =>
 					preBoxItemMap[key].find((item) => item.id === overId)
 				) ?? overId;
-
-			console.log(
-				"handleDragEnd",
-				active.id,
-				over.id,
-				sourceParentKey,
-				targetParentKey
-			);
 
 			if (!sourceParentKey || !targetParentKey) {
 				console.error(
@@ -171,7 +200,6 @@ export function MultipleSortableDragAndDrop() {
 				sensors={sensors}
 				collisionDetection={closestCenter}
 				onDragStart={handleDragStart}
-				// onDragMove={handleDragMove}
 				onDragOver={handleDragOver}
 				onDragEnd={handleDragEnd}
 			>
@@ -202,11 +230,11 @@ export function MultipleSortableDragAndDrop() {
 					))}
 				</div>
 				{/* ===== DragOverlay ===== */}
-				<DragOverlay>
-					{activeId ? (
+				{activeId && (
+					<DragOverlay>
 						<div className="bg-yellow-200 hover:bg-yellow-400 w-36 h-24 text-black text-2xl">{`overlay div ${activeId}`}</div>
-					) : null}
-				</DragOverlay>
+					</DragOverlay>
+				)}
 			</DndContext>
 		</section>
 	);
