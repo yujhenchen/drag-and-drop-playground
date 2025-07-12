@@ -50,6 +50,14 @@ export function MultipleSortableDragAndDrop() {
 		setActiveId(active.id.toString());
 	}
 
+	function updateActiveId(source: string, target: string, id: string): void {
+		if (source !== target) {
+			setActiveId(id);
+		} else {
+			setActiveId(null);
+		}
+	}
+
 	function handleDragOver(event: DragOverEvent): void {
 		const { active, over } = event;
 
@@ -57,7 +65,6 @@ export function MultipleSortableDragAndDrop() {
 			return;
 		}
 
-		// console.log(active.id, over.id);
 		const keys = Object.keys(boxItemMap);
 
 		const sourceParent = keys.find((key) =>
@@ -68,14 +75,11 @@ export function MultipleSortableDragAndDrop() {
 			return;
 		}
 
+		const actId = active.id.toString();
+
 		// === target is droppable container ===
 		if (over.id.toString().includes(BOX_ID_PREFIX)) {
-			if (sourceParent !== over.id.toString()) {
-				setActiveId(active.id.toString());
-			} else {
-				setActiveId(null);
-			}
-			return;
+			return updateActiveId(sourceParent, over.id.toString(), actId);
 		}
 
 		// === target is item ===
@@ -85,12 +89,7 @@ export function MultipleSortableDragAndDrop() {
 		if (!targetParent) {
 			return;
 		}
-
-		if (sourceParent !== targetParent) {
-			setActiveId(active.id.toString());
-		} else {
-			setActiveId(null);
-		}
+		updateActiveId(sourceParent, targetParent, actId);
 	}
 
 	function handleDragEnd(event: DragEndEvent) {
